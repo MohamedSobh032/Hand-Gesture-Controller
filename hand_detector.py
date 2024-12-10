@@ -165,6 +165,11 @@ class hand_detector:
                 cv2.line(roi, start, end, [0, 255, 0], 2)
         return l
 
+    # TODO: CONVEX HULL FROM SCRATCH
+    def convex_hull():
+        pass
+
+    ########################################## DISPLAY ##########################################
     def analyse_contours(self, frame: np.ndarray, cnt, l: int) -> None:
         """
         Writes to the image the signal of the hand.
@@ -236,7 +241,3 @@ class hand_detector:
         masks_result = cv2.cvtColor(masks_result, cv2.COLOR_GRAY2BGR)
         result_image = np.concatenate((frame, masks_result), axis=1)
         cv2.imshow('Hand Detection', result_image)
-
-    # TODO: CONVEX HULL FROM SCRATCH
-    def convex_hull():
-        pass
