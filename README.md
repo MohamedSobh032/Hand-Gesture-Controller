@@ -19,4 +19,4 @@ To run the Hand Gesture Controller, you'll need the following Python packages:
 You can install these required packages using pip. Run the following command in your terminal:
 
 ```bash
-pip install opencv-python mediapipe numpy pyautogui
+pip install opencv-python numpy pyautogui
