@@ -70,8 +70,8 @@ class hand_detector:
             roi = frame[100:300, 100:300]
             cv2.rectangle(frame, (100, 100), (300, 300), (0, 255, 0), 0)
         elif roi_position.lower() == 'right':
-            roi = frame[50:300, 300:550]
-            cv2.rectangle(frame, (300, 50), (550, 300), (0, 255, 0), 0)
+            roi = frame[100:300, 300:500]
+            cv2.rectangle(frame, (300, 100), (500, 300), (0, 255, 0), 0)
         else:
             raise ValueError('roi_position must be left or right only')
         

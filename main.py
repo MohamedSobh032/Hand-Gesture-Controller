@@ -20,7 +20,7 @@ def main():
     while True:
         try:
             _, frame = cap.read()
-            hand.detect(frame, 'left')
+            hand.detect(frame, 'right')
         except Exception as e:
             print(e)
         key = cv2.waitKey(10)

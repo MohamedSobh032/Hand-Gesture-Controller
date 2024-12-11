@@ -1,12 +1,9 @@
 # Hand Gesture Controller
 
 ## Algorithms Used
-- `` - For hand segmentation
-- `Canny` - For edge detection
-- `Convex Hull` - For detecting the fingers of the hand
+- `Masking, Dilation, Erosion and Gaussian` - For hand segmentation
 
 ## References
-
 
 ## Needed Packages
 
