@@ -2,6 +2,7 @@
 
 ## Algorithms Used
 - `Masking, Dilation, Erosion and Gaussian` - For hand segmentation
+- `Contour Detection, Convex Hull` - For dimension and angle between fingers detection
 
 ## References
 

@@ -67,11 +67,11 @@ class hand_detector:
             Position of the ROI block, left or right only
         '''
         if roi_position.lower() == 'left':
-            roi = frame[100:300, 100:300]
-            cv2.rectangle(frame, (100, 100), (300, 300), (0, 255, 0), 0)
+            roi = frame[50:250, 50:250]
+            cv2.rectangle(frame, (50, 50), (250, 250), (0, 255, 0), 0)
         elif roi_position.lower() == 'right':
-            roi = frame[100:300, 300:500]
-            cv2.rectangle(frame, (300, 100), (500, 300), (0, 255, 0), 0)
+            roi = frame[50:250, 400:600]
+            cv2.rectangle(frame, (400, 50), (600, 250), (0, 255, 0), 0)
         else:
             raise ValueError('roi_position must be left or right only')
         
@@ -147,27 +147,21 @@ class hand_detector:
                 start = tuple(approx[s][0])
                 end = tuple(approx[e][0])
                 far = tuple(approx[f][0])
-                pt = (100, 180)
 
-                a = math.sqrt((end[0] - start[0])**2 + (end[1] - start[1])**2)
-                b = math.sqrt((far[0] - start[0])**2 + (far[1] - start[1])**2)
-                c = math.sqrt((end[0] - far[0])**2 + (end[1] - far[1])**2)
+                a = math.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
+                b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
+                c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
                 s = (a + b + c) / 2
                 ar = math.sqrt(s * (s - a) * (s - b) * (s - c))
-
                 d = (2 * ar) / a
-
-                angle = math.acos((b**2 + c**2 - a**2) / (2 * b * c)) * 57
+                angle = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c)) * 57
 
                 if angle <= 90 and d > 30:
                     l += 1
+                    print(end)
                     cv2.circle(roi, far, 3, [255, 0, 0], -1)
                 cv2.line(roi, start, end, [0, 255, 0], 2)
         return l
-
-    # TODO: CONVEX HULL FROM SCRATCH
-    def convex_hull():
-        pass
 
     ########################################## DISPLAY ##########################################
     def analyse_contours(self, frame: np.ndarray, cnt, l: int) -> None:
@@ -207,8 +201,6 @@ class hand_detector:
         elif l == 3:
             if arearatio < 27:
                 cv2.putText(frame, '3', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
-            else:
-                cv2.putText(frame, 'ok', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
         elif l == 4:
             cv2.putText(frame, '4', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
         elif l == 5:
