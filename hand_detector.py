@@ -158,7 +158,6 @@ class hand_detector:
 
                 if angle <= 90 and d > 30:
                     l += 1
-                    print(end)
                     cv2.circle(roi, far, 3, [255, 0, 0], -1)
                 cv2.line(roi, start, end, [0, 255, 0], 2)
         return l
@@ -201,6 +200,8 @@ class hand_detector:
         elif l == 3:
             if arearatio < 27:
                 cv2.putText(frame, '3', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
+            else:
+                cv2.putText(frame, 'ok', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
         elif l == 4:
             cv2.putText(frame, '4', (0, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
         elif l == 5:
