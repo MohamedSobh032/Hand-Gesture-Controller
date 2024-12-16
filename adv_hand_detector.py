@@ -5,15 +5,26 @@ import math
 class adv_hand_detector:
 
     ###################################### INITIALIZATION #######################################
-    def __init__(self) -> None:
+    def __init__(self, roi_position: str = 'left') -> None:
         '''
         Creates an object of hand_detector, a class that contains all needed functions, variables and tuning variables
         to detect a hand inside ROI
+        ----------
+        Parameters
+        ----------
+        roi_position: str
+            Position of the ROI block, left or right only
         '''
+        if roi_position.lower() == 'left':
+            self.x1, self.x2, self.y1, self.y2 = 50, 250, 50, 250
+        elif roi_position.lower() == 'right':
+            self.x1, self.x2, self.y1, self.y2 = 50, 250, 400, 600
+        else:
+            raise ValueError('roi_position must be left or right only')
         # Initalize GUI (This part might be removed)
         cv2.namedWindow('Hand Detection')
 
-    def detect(self, frame: np.ndarray, roi_position: str = 'left') -> None:
+    def detect(self, frame: np.ndarray) -> None:
         '''
         main function to call to start the detection of the 2 finger process
         ----------
@@ -21,18 +32,9 @@ class adv_hand_detector:
         ----------
         frame: numpy array
             The frame to process
-
-        roi_position: str
-            Position of the ROI block, left or right only
         '''
-        if roi_position.lower() == 'left':
-            roi = frame[50:250, 50:250]
-            cv2.rectangle(frame, (50, 50), (250, 250), (0, 255, 0), 0)
-        elif roi_position.lower() == 'right':
-            roi = frame[50:250, 400:600]
-            cv2.rectangle(frame, (400, 50), (600, 250), (0, 255, 0), 0)
-        else:
-            raise ValueError('roi_position must be left or right only')
+        roi = frame[self.x1:self.x2, self.y1:self.y2]
+        cv2.rectangle(frame, (self.y1, self.x1), (self.y2, self.x2), (0, 255, 0), 0)
         
         mask = self.segment_hand(roi)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -44,7 +46,7 @@ class adv_hand_detector:
             pass
         self.show_results(mask, frame)
 
-    def segment_hand(self, ROI):
+    def segment_hand(self, ROI) -> np.ndarray:
 
         sobh = cv2.cvtColor(ROI, cv2.COLOR_BGR2RGB)
 
