@@ -2,58 +2,17 @@ import numpy as np
 import cv2
 import math
 
-class hand_detector:
+class adv_hand_detector:
 
     ###################################### INITIALIZATION #######################################
-    def __init__(self, average_color: np.ndarray, maximum_color: np.ndarray) -> None:
+    def __init__(self) -> None:
         '''
         Creates an object of hand_detector, a class that contains all needed functions, variables and tuning variables
         to detect a hand inside ROI
-        ----------
-        Parameters
-        ----------
-        average_color: numpy array
-            The average of HSV values to be detected
-
-        maximum_color: numpy array
-            The maximum of HSV values to be detected
         '''
-        # Initialize class variables
-        self.average_color = average_color
-        self.maximum_color = maximum_color
-        self.h_sensibility = 100
-        self.s_sensibility = 100
-        self.v_sensibility = 100
         # Initalize GUI (This part might be removed)
         cv2.namedWindow('Hand Detection')
-        cv2.createTrackbar('Hue Sensibility', 'Hand Detection', self.h_sensibility, 100, lambda: None)
-        cv2.createTrackbar('Saturation Sensibility', 'Hand Detection', self.s_sensibility, 100, lambda: None)
-        cv2.createTrackbar('Value Sensibility', 'Hand Detection', self.v_sensibility, 100, lambda: None)
 
-    ################################### THRESHOLDING FUNCTIONS ##################################
-    def set_sensibility(self, h_sensibility: int, s_sensibility: int, v_sensibility: int) -> np.ndarray:
-        '''
-        Sets the sensibility to adapt to light environment better
-        ----------
-        Parameters
-        ----------
-        h_sensibility: int, range(0, 100)
-            PERCENTAGE sensibility of hue channel
-
-        s_sensibility: int, range(0, 100)
-            PERCENTAGE sensibility of saturation channel
-
-        v_sensibility: int, range(0, 100)
-            PERCENTAGE sensibility of value channel
-        '''
-        hSens = (h_sensibility * self.maximum_color[0]) / 100
-        SSens = (s_sensibility * self.maximum_color[1]) / 100
-        VSens = (v_sensibility * self.maximum_color[2]) / 100
-        lower_bound_color = np.array([self.average_color[0] - hSens, self.average_color[1] - SSens, self.average_color[2] - VSens])
-        upper_bound_color = np.array([self.average_color[0] + hSens, self.average_color[1] + SSens, self.average_color[2] + VSens])
-        return np.array([lower_bound_color, upper_bound_color])
-
-    ################################ IMAGE PROCESSING ALGORITHMS ################################
     def detect(self, frame: np.ndarray, roi_position: str = 'left') -> None:
         '''
         main function to call to start the detection of the 2 finger process
@@ -75,13 +34,7 @@ class hand_detector:
         else:
             raise ValueError('roi_position must be left or right only')
         
-        # get values from trackbar
-        newHSens = cv2.getTrackbarPos('Hue Sensibility', 'Hand Detection')
-        newSSens = cv2.getTrackbarPos('Saturation Sensibility', 'Hand Detection')
-        newVSens = cv2.getTrackbarPos('Value Sensibility', 'Hand Detection')
-
-        lower_bound_color, upper_bound_color = self.set_sensibility(newHSens, newSSens, newVSens)
-        binary_mask, mask = self.segment_hand(roi, lower_bound_color, upper_bound_color)
+        mask = self.segment_hand(roi)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         try:
             cnt = max(contours, key=lambda x: cv2.contourArea(x))
@@ -89,35 +42,41 @@ class hand_detector:
             self.analyse_contours(frame, cnt, l + 1)
         except ValueError:
             pass
-        self.show_results(binary_mask, mask, frame)
+        self.show_results(mask, frame)
 
-    def segment_hand(self, roi: np.ndarray, lower_bound_color: np.ndarray, upper_bound_color: np.ndarray) -> list[np.ndarray]:
-        '''
-        Segment the hand in ROI block.
-        ----------
-        Parameters
-        ----------
-        frame: numpy array
-            The frame to process
+    def segment_hand(self, ROI):
 
-        roi: numpy array
-            part of the frame to detect on
+        sobh = cv2.cvtColor(ROI, cv2.COLOR_BGR2RGB)
 
-        lower_bound_color: np array
-            lower range of HSV
+        # Reshaping the image into a 2D array of pixels and 3 color values (RGB)
+        pixel_vals = sobh.reshape((-1,3))
 
-        upper_bound_color: np array
-            upper range of HSV
+        # Convert to float type
+        pixel_vals = np.float32(pixel_vals)
 
-        returns the segmented image frame and the ROI
-        '''
-        kernel = np.ones((3, 3), np.uint8)
-        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
-        binary_mask = cv2.inRange(hsv, lower_bound_color, upper_bound_color)
-        mask = cv2.dilate(binary_mask, kernel, iterations=3)
-        mask = cv2.erode(mask, kernel, iterations=3)
-        mask = cv2.GaussianBlur(mask, (5, 5), 90)
-        return [binary_mask, mask]
+        #the below line of code defines the criteria for the algorithm to stop running, 
+        #which will happen is 100 iterations are run or the epsilon (which is the required accuracy) 
+        #becomes 85%
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.85)
+
+        # then perform k-means clustering with number of clusters defined as 3
+        #also random centres are initially choosed for k-means clustering
+        k = 2
+        _, labels, centers = cv2.kmeans(pixel_vals, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+
+        # convert data into 8-bit values
+        centers = np.uint8(centers)
+        segmented_data = centers[labels.flatten()]
+
+        # reshape data into the original image dimensions
+        segmented_image = segmented_data.reshape((sobh.shape))
+        segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2GRAY)
+
+        masker = (segmented_image < 150) & (segmented_image > 0)
+        segmented_image[masker] = 255
+        segmented_image[~masker] = 0
+
+        return segmented_image
     
     def analyse_defects(self, cnt, roi: np.ndarray) -> int:
         """
@@ -161,7 +120,6 @@ class hand_detector:
                 cv2.line(roi, start, end, [0, 255, 0], 2)
         return l
 
-    ########################################## DISPLAY ##########################################
     def analyse_contours(self, frame: np.ndarray, cnt, l: int) -> None:
         """
         Writes to the image the signal of the hand.
@@ -210,7 +168,7 @@ class hand_detector:
         else:
             cv2.putText(frame, 'reposition', (10, 50), font, 2, (0, 0, 255), 3, cv2.LINE_AA)
 
-    def show_results(self, binary_mask: np.ndarray, mask: np.ndarray, frame: np.ndarray) -> None:
+    def show_results(self, mask: np.ndarray, frame: np.ndarray) -> None:
         """
         Shows the image with the results on it.
         The image is a result of a combination of the image with the result on it, the original captured ROI, and the ROI after optimizations.
@@ -226,10 +184,9 @@ class hand_detector:
         frame : array-like
           Frame to be displayed
         """
-        combine_masks = np.concatenate((binary_mask, mask), axis=0)
         height, _, _ = frame.shape
-        _, width = combine_masks.shape
-        masks_result = cv2.resize(combine_masks, dsize=(width, height))
+        _, width = mask.shape
+        masks_result = cv2.resize(mask, dsize=(width, height))
         masks_result = cv2.cvtColor(masks_result, cv2.COLOR_GRAY2BGR)
         result_image = np.concatenate((frame, masks_result), axis=1)
         cv2.imshow('Hand Detection', result_image)

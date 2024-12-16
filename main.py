@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from hand_detector import hand_detector
+from adv_hand_detector import adv_hand_detector
 
 ########################################## DEFINES ##########################################
 AI = 0
@@ -15,7 +16,7 @@ upper_color = np.array([180, 150, 250], dtype=np.uint8)
 ################################### MAIN APPLICATION CODE ###################################
 def normal_processing():
     """Main function of the app"""
-    hand = hand_detector(lower_color, upper_color)
+    hand = adv_hand_detector()
     cap = cv2.VideoCapture(CAMERA_INDEX)
 
     while True:
@@ -25,7 +26,7 @@ def normal_processing():
             hand.detect(frame, 'left')
         except Exception as e:
             print(e)
-        ################################## INPUT BREAKS ##################################
+        ################################### INPUT BREAKS ####################################
         key = cv2.waitKey(10)
         if key == ord('q'):
             cap.release()
