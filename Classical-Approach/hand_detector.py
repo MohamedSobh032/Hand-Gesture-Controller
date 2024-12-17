@@ -235,10 +235,6 @@ class hand_detector:
         cv2.imshow('Hand Detection', result_image)
 
 
-import numpy as np
-import cv2
-import math
-
 class adv_hand_detector:
 
     ###################################### INITIALIZATION #######################################
@@ -277,8 +273,8 @@ class adv_hand_detector:
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         try:
             cnt = max(contours, key=lambda x: cv2.contourArea(x))
-            l = self.analyse_defects(cnt, roi)
-            self.analyse_contours(frame, cnt, l + 1)
+            l = self.analyse_defects(cnt, roi) + 1
+            self.analyse_contours(frame, cnt, l)
         except ValueError:
             pass
         self.show_results(mask, frame)
@@ -350,10 +346,8 @@ class adv_hand_detector:
             b = math.sqrt((far[0] - start[0]) ** 2 + (far[1] - start[1]) ** 2)
             c = math.sqrt((end[0] - far[0]) ** 2 + (end[1] - far[1]) ** 2)
             s = (a + b + c) / 2
-            ar = math.sqrt(s * (s - a) * (s - b) * (s - c))
-            d = (2 * ar) / a
             angle = math.acos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c)) * 57
-            if angle <= 90 and d > 30:
+            if angle <= 90:
                 l += 1
                 cv2.circle(roi, far, 3, [255, 0, 0], -1)
             cv2.line(roi, start, end, [0, 255, 0], 2)
