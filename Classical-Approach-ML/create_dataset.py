@@ -72,4 +72,4 @@ if __name__ == '__main__':
                 X.append(features)
                 y.append(label)
     with open(os.path.join(script_dir, 'data.pkl'), 'wb') as f:
-        pickle.dump({'data': np.array(X), 'labels': labels}, f)
+        pickle.dump({'data': np.array(X), 'labels': np.array(y)}, f)
