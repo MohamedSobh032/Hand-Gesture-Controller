@@ -15,14 +15,14 @@ upper_color = np.array([180, 150, 250], dtype=np.uint8)
 ################################### MAIN APPLICATION CODE ###################################
 def normal_processing():
     """Main function of the app"""
-    hand = adv_hand_detector('left')
+    hand = hand_detector(lower_color, upper_color)
     cap = cv2.VideoCapture(CAMERA_INDEX)
 
     while True:
         try:
             _, frame = cap.read()
             frame = cv2.flip(frame, 1)
-            hand.detect(frame)
+            hand.detect(frame, 'left')
         except Exception as e:
             print(e)
         ################################### INPUT BREAKS ####################################
