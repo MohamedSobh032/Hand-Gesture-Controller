@@ -4,3 +4,5 @@ test.ipynb
 Project.ipynb
 commonfunctions.py
 data
+*.pkl
+*.p
