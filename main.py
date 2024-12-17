@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
-from hand_detector import hand_detector
-from adv_hand_detector import adv_hand_detector
+from hand_detector import hand_detector, adv_hand_detector
 
 ########################################## DEFINES ##########################################
 AI = 0
