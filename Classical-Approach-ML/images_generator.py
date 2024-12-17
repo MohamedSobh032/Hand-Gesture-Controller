@@ -30,7 +30,7 @@ def segment_hand(roi: np.ndarray, lower_bound_color: np.ndarray, upper_bound_col
 script_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = 'data'
 classes = ['thumbsup', 'thumbsdown', 'iloveyou', 'openpalm', 'closedfist', 'victory']
-dataset_size = 100
+dataset_size = 1000
 
 def generate_images():
 
@@ -50,9 +50,13 @@ def generate_images():
         while True:
             _, frame = cap.read()
             frame = cv2.flip(frame, 1)
+            roi = frame[50:250, 50:250]
             cv2.rectangle(frame, (50, 50), (250, 250), (0, 255, 0), 0)
             cv2.putText(frame, f'Press "Q" {j}', (10, 35), cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 3, cv2.LINE_AA)
             cv2.imshow('frame', frame)
+            roi = segment_hand(roi, lower_bound_color, upper_bound_color)
+            cv2.imshow('roi', roi)
+
             if cv2.waitKey(25) == ord('q'):
                 break
 
@@ -66,8 +70,8 @@ def generate_images():
 
             # SEGMENT THE IMAGE
             roi = segment_hand(roi, lower_bound_color, upper_bound_color)
-
-            cv2.waitKey(25)
+            cv2.imshow('roi', roi)
+            cv2.waitKey(1)
             cv2.imwrite(os.path.join(script_dir, DATA_DIR, j, '{}.jpg'.format(counter)), roi)
             counter += 1
 
