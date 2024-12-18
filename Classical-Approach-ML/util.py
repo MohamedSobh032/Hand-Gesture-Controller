@@ -9,8 +9,8 @@ import imutils
 script_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = 'data'
 DATASET_NAME = 'data.pkl'
-gestures = ['thumbsup', 'thumbsdown', 'iloveyou', 'openpalm', 'closedfist', 'victory']
-dataset_size = 100
+gestures = ['thumbsup', 'thumbsdown', 'iloveyou', 'openpalm', 'closedfist', 'victory', 'nohand']
+dataset_size = 1000
 random_seed = 42
 
 ############################################ GENERAL FUNCTIONS NEEDED ############################################
@@ -36,7 +36,7 @@ def segment_hand_kmeans(ROI):
     # reshape data into the original image dimensions
     segmented_image = segmented_data.reshape((sobh.shape))
     segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2GRAY)
-    masker = (segmented_image <= 200) & (segmented_image >= 0)
+    masker = (segmented_image <= 150) & (segmented_image >= 0)
     segmented_image[masker] = 255
     segmented_image[~masker] = 0
     return segmented_image
