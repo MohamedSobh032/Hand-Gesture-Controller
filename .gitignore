@@ -6,3 +6,5 @@ commonfunctions.py
 data
 *.pkl
 model
+*.joblib
+*.p
