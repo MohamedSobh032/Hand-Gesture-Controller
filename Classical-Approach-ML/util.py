@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 from skimage.feature import hog, graycomatrix, graycoprops
+from skimage.exposure import histogram
 import imutils
 
 ########################################## GLOBAL DEFINES AND VARIABLES ##########################################
@@ -14,6 +15,63 @@ dataset_size = 1000
 random_seed = 42
 
 ############################################ GENERAL FUNCTIONS NEEDED ############################################
+
+def getGraylevelCounts(image):
+    """
+        Documentation
+    """
+    histImage = histogram(image)
+    frequency = histImage[0]
+    bins = histImage[1]
+    graylevels = np.zeros(256).astype(int)
+    counts = np.zeros(256).astype(int)
+
+    for i in range(0, 256):
+        graylevels[i] = i
+
+    for i in range(0, frequency.shape[0]):
+        counts[bins[i]] = frequency[i]
+
+    return counts, graylevels
+
+def getThreshold(image):
+    """
+        Documentation
+    """
+    counter = 0
+    image = image.astype(np.uint8)
+    counts, bins = getGraylevelCounts(image)
+    cumulativecount = np.cumsum(counts)
+    t_old = 0
+
+    threshold = round(np.sum(np.multiply(counts, bins)/cumulativecount[-1]))
+
+    while (threshold != t_old):
+        if (counter > 256):
+            break
+        counter += 1
+        t_old = threshold
+        low = list(range(0, t_old))
+        high = list(range(t_old+1, 256))
+        t_low = np.sum(np.multiply(
+            counts[0:t_old], low))//cumulativecount[t_old-1]
+        t_high = np.sum(np.multiply(
+            counts[t_old+1:256], high))//(cumulativecount[-1]-cumulativecount[t_old+1])
+        threshold = round((t_low + t_high)//2)
+    return threshold
+
+def getSegmentedImage(image, threshold):
+    """
+        Documentation
+    """
+    segmented_image = np.copy(image)
+    mask = segmented_image > threshold
+    segmented_image[~mask] = 0
+    segmented_image[mask] = 255
+    return segmented_image
+
+def segment(image):
+    return getSegmentedImage(image, getThreshold(image))
 
 def segment_hand_kmeans(ROI):
 

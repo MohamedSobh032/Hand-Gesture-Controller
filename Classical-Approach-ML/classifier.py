@@ -40,16 +40,7 @@ def main():
         gesture = recognizer.recognize_gesture(roi)
         if gesture == 'closedfist':
             # 1. Contour-based features
-            contours, _ = cv2.findContours(roi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            hand_contour = max(contours, key=cv2.contourArea)
-            if not contours:
-                pass
-            moments = cv2.moments(hand_contour)
-            if moments["m00"] != 0:
-                cx = int(moments["m10"] / moments["m00"])  # X center
-                cy = int(moments["m01"] / moments["m00"])  # Y center
-                position = (cx, cy)
-            print(position)
+            pass
         elif gesture == 'thumbsup':
             pyautogui.hotkey('ctrl', '+')
         elif gesture == 'thumbsdown':
@@ -58,10 +49,6 @@ def main():
             pyautogui.rightClick()
         elif gesture == 'victory':
             pyautogui.leftClick()
-        elif gesture == 'openpalm':
-            pass
-        elif gesture == 'nohand':
-            pass
         else:
             pass
 
