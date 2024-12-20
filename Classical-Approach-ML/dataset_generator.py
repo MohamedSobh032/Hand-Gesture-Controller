@@ -1,8 +1,8 @@
 import os
 import pickle
-import util
 import cv2
 import numpy as np
+import util
 
 def create_hand_gesture_dataset():
     """

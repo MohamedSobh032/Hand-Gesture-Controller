@@ -18,11 +18,16 @@ This project contains 2 sections, Classical approach with Machine Learning, and 
 ## Needed Packages
 To run the Hand Gesture Controller, you'll need the following Python packages:
 
-- `opencv-python` - for image processing and computer vision tasks
-- `numpy` - for array handling and mathematical operations
+- `opencv-python` - For image processing and computer vision tasks
+- `os` - For creating paths that work on any OS
+- `numpy` - For array handling and mathematical operations
+- `pickle` - For data serialization in dataset creation and model generation
+- `skimage` - For Histogram of Gradients function
+- `sklearn` - For classifiers and model training
+- `matplotlib` - For comparison and visualization of different classifiers accuray
 - `pyautogui` - for controlling the mouse and keyboard
 
 You can install these required packages using pip. Run the following command in your terminal:
 
 ```bash
-pip install opencv-python numpy pyautogui
+pip install -r requirements.txt
