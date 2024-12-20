@@ -1,5 +1,7 @@
 # Hand Gesture Controller
-This project contains 2 sections, Classical approach with Machine Learning, and Neural networks and Deep Learning Approach
+This project has 2 sections:
+- Classical Approch with Machine Learning
+- Neural Networks and Deep Learning Approach
 
 ## Algorithms Used in Classical Approach
 - `K-Means Binary Clustering` - For hand segmentation.
