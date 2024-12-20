@@ -8,7 +8,7 @@ from skimage.feature import hog
 script_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = 'data'
 DATASET_NAME = 'data.pkl'
-gestures = ['thumbsup', 'thumbsdown', 'iloveyou', 'openpalm', 'closedfist', 'victory', 'nohand']
+gestures = ['thumbs_left', 'thumbs_right', 'i_love_you', 'open_palm', 'closed_fist', 'victory', 'no_hand_dark', 'no_hand_light']
 dataset_size = 1000
 random_seed = 42
 

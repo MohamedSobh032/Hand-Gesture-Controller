@@ -36,12 +36,31 @@ class HandGestureRecognizer:
 
         return (center_x, center_y)
 
+
+def take_action(frame: np.ndarray, roi: np.ndarray, gesture: str) -> None:
+    if gesture == 'closed_fist':
+        # Find the center of the hand
+        center = HandGestureRecognizer.find_hand_center(roi)
+        cv2.circle(frame, center, 3, [255, 0, 0], -1)
+        print(center)
+    elif gesture == 'thumbs_up':
+        pyautogui.hotkey('ctrl', '+')
+    elif gesture == 'thumbs_down':
+        pyautogui.hotkey('ctrl', '-')
+    elif gesture == 'i_love_you':
+        pyautogui.rightClick()
+    elif gesture == 'victory':
+        pyautogui.leftClick()
+    else:
+        pass
+
 def main():
 
     cap = cv2.VideoCapture(0)
     recognizer = HandGestureRecognizer()
 
     while True:
+        
         # read the frame and flip it
         _, frame = cap.read()
         frame = cv2.flip(frame, 1)
@@ -56,28 +75,13 @@ def main():
 
         # recognize the gesture
         gesture = recognizer.recognize_gesture(roi)
-        if gesture == 'closedfist':
-
-            # Find the center of the hand
-            center = HandGestureRecognizer.find_hand_center(roi)
-            cv2.circle(frame, center, 3, [255, 0, 0], -1)
-            print(center)
-
-        elif gesture == 'thumbsup':
-            pyautogui.hotkey('ctrl', '+')
-        elif gesture == 'thumbsdown':
-            pyautogui.hotkey('ctrl', '-')
-        elif gesture == 'iloveyou':
-            pyautogui.rightClick()
-        elif gesture == 'victory':
-            pyautogui.leftClick()
-        else:
-            pass
+        take_action(frame, roi, gesture)
 
         cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow('Hand Gesture Recognition', frame)
-        if cv2.waitKey(25) == ord('q'):
+        if cv2.waitKey(1) == ord('q'):
             break
+
     cap.release()
     cv2.destroyAllWindows()
 
