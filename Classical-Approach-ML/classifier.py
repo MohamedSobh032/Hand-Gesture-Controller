@@ -19,10 +19,28 @@ class HandGestureRecognizer:
             return "No hand detected"
         prediction = self.classifier.predict([np.asarray(features)])
         return prediction[0]
+    
+    def find_hand_center(image):
+        # Find all non-zero points (hand pixels)
+        non_zero_points = cv2.findNonZero(image)
+
+        # Calculate center using moments
+        M = cv2.moments(image)
+        if M["m00"] != 0:
+            center_x = int(M["m10"] / M["m00"])
+            center_y = int(M["m01"] / M["m00"])
+        else:
+            # Fallback if moments fail
+            mean_point = np.mean(non_zero_points, axis=0)
+            center_x, center_y = mean_point[0]
+
+        return (center_x, center_y)
 
 def main():
+
     cap = cv2.VideoCapture(0)
     recognizer = HandGestureRecognizer()
+
     while True:
         # read the frame and flip it
         _, frame = cap.read()
@@ -39,8 +57,12 @@ def main():
         # recognize the gesture
         gesture = recognizer.recognize_gesture(roi)
         if gesture == 'closedfist':
-            # 1. Contour-based features
-            pass
+
+            # Find the center of the hand
+            center = HandGestureRecognizer.find_hand_center(roi)
+            cv2.circle(frame, center, 3, [255, 0, 0], -1)
+            print(center)
+
         elif gesture == 'thumbsup':
             pyautogui.hotkey('ctrl', '+')
         elif gesture == 'thumbsdown':
