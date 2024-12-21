@@ -85,7 +85,7 @@ class HandGestureClassifier:
         best_clf = self.classifiers[classifier_name]
 
         # Save the model and scaler
-        with open(os.path.join(util.script_dir, 'classifier.p'), 'wb') as f:
+        with open(os.path.join(util.script_dir, util.MODEL_NAME), 'wb') as f:
             pickle.dump({'model': best_clf}, f)
 
 

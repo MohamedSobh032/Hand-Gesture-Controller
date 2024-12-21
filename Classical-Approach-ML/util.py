@@ -10,6 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = 'data'
 DATASET_NAME = 'data.pkl'
 CAM_INDEX = 0
+MODEL_NAME = 'classifier.pkl'
 
 gestures = ['thumbs_up', 'thumbs_down', 'i_love_you', 'open_palm', 'closed_fist', 'victory']
 dataset_size = 1000

@@ -6,7 +6,7 @@ import util
 import pyautogui
 
 class HandGestureRecognizer:
-    def __init__(self, model_path=os.path.join(util.script_dir, 'classifier.p')):
+    def __init__(self, model_path=os.path.join(util.script_dir, util.MODEL_NAME)):
         '''
         Initialize the HandGestureRecognizer with the trained model
         '''
