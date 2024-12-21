@@ -7,20 +7,33 @@ import pyautogui
 
 class HandGestureRecognizer:
     def __init__(self, model_path=os.path.join(util.script_dir, 'classifier.p')):
+        '''
+        Initialize the HandGestureRecognizer with the trained model
+        '''
+
+        # Read the model and save it in a variable
         with open(model_path, 'rb') as f:
             self.classifier = pickle.load(f)['model']
-        self.x1, self.x2 = 50, 250
-        self.y1, self.y2 = 50, 250
 
     def recognize_gesture(self, binary_image):
-        
+        '''
+        Recognize the gesture from the binary image by extracting HOG features then predicting the gesture
+        '''
+
+        # Extract HOG features
         features = util.extract_hog_features(binary_image)
         if features is None:
             return "No hand detected"
+        
+        # Predict the gesture
         prediction = self.classifier.predict([np.asarray(features)])
         return prediction[0]
     
     def find_hand_center(image):
+        '''
+        Find the center of the hand in the binary image
+        '''
+
         # Find all non-zero points (hand pixels)
         non_zero_points = cv2.findNonZero(image)
 
@@ -38,11 +51,14 @@ class HandGestureRecognizer:
 
 
 def take_action(frame: np.ndarray, roi: np.ndarray, gesture: str) -> None:
+    '''
+    Take action based on the recognized gesture by the user
+    '''
     if gesture == 'closed_fist':
         # Find the center of the hand
         center = HandGestureRecognizer.find_hand_center(roi)
         cv2.circle(frame, center, 3, [255, 0, 0], -1)
-        print(center)
+        pyautogui.moveTo(center[0], center[1])
     elif gesture == 'thumbs_up':
         pyautogui.hotkey('ctrl', '+')
     elif gesture == 'thumbs_down':
@@ -55,19 +71,24 @@ def take_action(frame: np.ndarray, roi: np.ndarray, gesture: str) -> None:
         pass
 
 def main():
+    '''
+    Main function of our project
+    '''
 
+    # Initialize the camera and the recognizer
     cap = cv2.VideoCapture(0)
     recognizer = HandGestureRecognizer()
 
+    pyautogui.FAILSAFE = False
+
     while True:
-        
         # read the frame and flip it
         _, frame = cap.read()
         frame = cv2.flip(frame, 1)
 
         # ROI based solution
-        cv2.rectangle(frame, (recognizer.x1, recognizer.y1), (recognizer.x2, recognizer.y2), (0, 255, 0), 2)
-        roi = frame[recognizer.x1:recognizer.x2, recognizer.y1:recognizer.y2]
+        cv2.rectangle(frame, (util.x1 - 1, util.y1 - 1), (util.x2 + 1, util.y2 + 1), (0, 255, 0), 2)
+        roi = frame[util.x1:util.x2, util.y1:util.y2]
 
         # segment the image using kmeans
         roi = util.segment_hand_kmeans(roi)
@@ -75,6 +96,8 @@ def main():
 
         # recognize the gesture
         gesture = recognizer.recognize_gesture(roi)
+        
+        # Take action based on the gesture
         take_action(frame, roi, gesture)
 
         cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)

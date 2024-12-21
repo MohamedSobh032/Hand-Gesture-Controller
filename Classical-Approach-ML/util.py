@@ -2,17 +2,53 @@ import os
 import cv2
 import numpy as np
 from skimage.feature import hog
+from sklearn.cluster import KMeans
 
 ########################################## GLOBAL DEFINES AND VARIABLES ##########################################
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = 'data'
 DATASET_NAME = 'data.pkl'
-gestures = ['thumbs_left', 'thumbs_right', 'i_love_you', 'open_palm', 'closed_fist', 'victory', 'no_hand_dark', 'no_hand_light']
+CAM_INDEX = 0
+
+gestures = ['thumbs_up', 'thumbs_down', 'i_love_you', 'open_palm', 'closed_fist', 'victory']
 dataset_size = 1000
 random_seed = 42
 
+x1, x2, y1, y2 = 50, 250, 50, 250
+
 ############################################ GENERAL FUNCTIONS NEEDED ############################################
+
+def segment_hand_kmeans_2(image):
+
+    # Convert the image to YCbCr color space
+    ycbcr_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+    
+    # Extract Cb and Cr channels
+    cb_cr = ycbcr_image[:, :, 1:3]
+    cb_cr_flattened = cb_cr.reshape((-1, 2))
+    
+    # Step 2: Apply K-means clustering
+    kmeans = KMeans(n_clusters=2, random_state=0, n_init=10)
+    labels = kmeans.fit_predict(cb_cr_flattened)
+    
+    # Reshape labels to match the image dimensions
+    clustered_image = labels.reshape((cb_cr.shape[0], cb_cr.shape[1]))
+    
+    # Step 3: Binarize the image (foreground as 1, background as 0)
+    binary_image = np.uint8(clustered_image == clustered_image[0, 0]) * 255
+    
+    # # Invert the binary image if necessary
+    if np.mean(binary_image[:10, :10]) > 128:
+        binary_image = 255 - binary_image
+
+    # Step 4: Morphological processing
+    # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    # binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
+    # binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, kernel)
+
+    return binary_image
+
 
 def segment_hand_kmeans(ROI):
 
