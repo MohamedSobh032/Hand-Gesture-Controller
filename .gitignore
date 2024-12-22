@@ -4,7 +4,8 @@ test.ipynb
 Project.ipynb
 commonfunctions.py
 data
-*.pkl
+data.pkl
 model
+classifier.pkl
 *.joblib
 Trial-and-Error

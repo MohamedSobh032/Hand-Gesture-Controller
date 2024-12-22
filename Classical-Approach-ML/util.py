@@ -10,6 +10,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = 'data'
 DATASET_NAME = 'data.pkl'
 CAM_INDEX = 0
+MODEL_NAME = 'classifier.pkl'
 
 gestures = ['thumbs_up', 'thumbs_down', 'i_love_you', 'open_palm', 'closed_fist', 'victory']
 dataset_size = 1000
@@ -71,9 +72,6 @@ def segment_hand_kmeans(ROI):
     # reshape data into the original image dimensions
     segmented_image = segmented_data.reshape((sobh.shape))
     segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2GRAY)
-    masker = (segmented_image <= 150) & (segmented_image >= 0)
-    segmented_image[masker] = 255
-    segmented_image[~masker] = 0
     return segmented_image
 
 def extract_hog_features(img):

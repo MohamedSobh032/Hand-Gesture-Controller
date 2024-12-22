@@ -6,7 +6,7 @@ import util
 import pyautogui
 
 class HandGestureRecognizer:
-    def __init__(self, model_path=os.path.join(util.script_dir, 'classifier.p')):
+    def __init__(self, model_path=os.path.join(util.script_dir, util.MODEL_NAME)):
         '''
         Initialize the HandGestureRecognizer with the trained model
         '''
@@ -98,7 +98,7 @@ def main():
         gesture = recognizer.recognize_gesture(roi)
         
         # Take action based on the gesture
-        take_action(frame, roi, gesture)
+        #take_action(frame, roi, gesture)
 
         cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow('Hand Gesture Recognition', frame)
