@@ -2,7 +2,6 @@ import os
 import cv2
 import numpy as np
 from skimage.feature import hog
-from sklearn.cluster import KMeans
 import pyclesperanto_prototype as cle
 
 ########################################## GLOBAL DEFINES AND VARIABLES ##########################################

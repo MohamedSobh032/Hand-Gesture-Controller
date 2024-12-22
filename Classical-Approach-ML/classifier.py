@@ -6,6 +6,7 @@ import util
 import pyautogui
 
 class HandGestureRecognizer:
+
     def __init__(self, model_path=os.path.join(util.script_dir, util.MODEL_NAME)):
         '''
         Initialize the HandGestureRecognizer with the trained model
@@ -14,6 +15,7 @@ class HandGestureRecognizer:
         # Read the model and save it in a variable
         with open(model_path, 'rb') as f:
             self.classifier = pickle.load(f)['model']
+
 
     def recognize_gesture(self, binary_image):
         '''
@@ -29,6 +31,7 @@ class HandGestureRecognizer:
         prediction = self.classifier.predict([np.asarray(features)])
         return prediction[0]
     
+
     def find_hand_center(image):
         '''
         Find the center of the hand in the binary image
@@ -99,6 +102,8 @@ def main():
         
         # Take action based on the gesture
         #take_action(frame, roi, gesture)
+        centerx, centery = HandGestureRecognizer.find_hand_center(roi)
+        cv2.circle(frame, (util.x1 + centerx, util.y1 + centery), 3, [255, 0, 0], -1)
 
         cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow('Hand Gesture Recognition', frame)
