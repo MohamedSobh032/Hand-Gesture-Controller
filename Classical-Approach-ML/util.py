@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from skimage.feature import hog
 from sklearn.cluster import KMeans
+import pyclesperanto_prototype as cle
 
 ########################################## GLOBAL DEFINES AND VARIABLES ##########################################
 
@@ -20,38 +21,7 @@ x1, x2, y1, y2 = 50, 250, 50, 250
 
 ############################################ GENERAL FUNCTIONS NEEDED ############################################
 
-def segment_hand_kmeans_2(image):
-
-    # Convert the image to YCbCr color space
-    ycbcr_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
-    
-    # Extract Cb and Cr channels
-    cb_cr = ycbcr_image[:, :, 1:3]
-    cb_cr_flattened = cb_cr.reshape((-1, 2))
-    
-    # Step 2: Apply K-means clustering
-    kmeans = KMeans(n_clusters=2, random_state=0, n_init=10)
-    labels = kmeans.fit_predict(cb_cr_flattened)
-    
-    # Reshape labels to match the image dimensions
-    clustered_image = labels.reshape((cb_cr.shape[0], cb_cr.shape[1]))
-    
-    # Step 3: Binarize the image (foreground as 1, background as 0)
-    binary_image = np.uint8(clustered_image == clustered_image[0, 0]) * 255
-    
-    # # Invert the binary image if necessary
-    if np.mean(binary_image[:10, :10]) > 128:
-        binary_image = 255 - binary_image
-
-    # Step 4: Morphological processing
-    # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    # binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
-    # binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, kernel)
-
-    return binary_image
-
-
-def segment_hand_kmeans(ROI):
+def segment_hand_kmeans(ROI, k = 2):
 
     sobh = cv2.cvtColor(ROI, cv2.COLOR_BGR2RGB)
     # Reshaping the image into a 2D array of pixels and 3 color values (RGB)
@@ -64,7 +34,6 @@ def segment_hand_kmeans(ROI):
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.85)
     # then perform k-means clustering with number of clusters defined as 3
     #also random centres are initially choosed for k-means clustering
-    k = 2
     _, labels, centers = cv2.kmeans(pixel_vals, k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
     # convert data into 8-bit values
     centers = np.uint8(centers)
@@ -74,6 +43,12 @@ def segment_hand_kmeans(ROI):
     segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2GRAY)
     return segmented_image
 
+def thresholding_otsu(ROI):
+
+    img_gaussian2 = cle.gaussian_blur(ROI, sigma_x=1, sigma_y=1, sigma_z=1)
+    img_thresh = cle.threshold_otsu(img_gaussian2) * 255
+    return np.array(img_thresh)
+
 def extract_hog_features(img):
     """
     TODO
@@ -82,4 +57,3 @@ def extract_hog_features(img):
     """
     img = cv2.resize(img, (64, 128))
     return hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True)[0]
-

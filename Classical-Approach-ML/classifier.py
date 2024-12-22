@@ -91,7 +91,7 @@ def main():
         roi = frame[util.x1:util.x2, util.y1:util.y2]
 
         # segment the image using kmeans
-        roi = util.segment_hand_kmeans(roi)
+        roi = util.segment_hand_kmeans(roi, 3) * 255
         cv2.imshow('roi', roi)
 
         # recognize the gesture
