@@ -26,7 +26,6 @@ def create_hand_gesture_dataset():
 
             # read the image and get the HOG
             img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-            img = cv2.inRange(img, 200, 255, cv2.THRESH_BINARY)
             
             features = util.extract_hog_features(img)
 

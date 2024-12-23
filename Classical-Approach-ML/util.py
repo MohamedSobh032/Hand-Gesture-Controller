@@ -25,7 +25,7 @@ MODEL_NAME = 'classifier.pkl'
 gestures = ['thumbs_up', 'thumbs_down', 'i_love_you', 'open_palm', 'closed_fist', 'victory']
 
 # Number of frames to capture for each gesture
-dataset_size = 1000
+dataset_size = 2000
 
 # Range of interest box dimensions
 x1, x2, y1, y2 = 50, 250, 50, 250
