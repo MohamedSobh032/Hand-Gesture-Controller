@@ -34,7 +34,10 @@ class HandGestureRecognizer:
         '''Take action based on the recognized gesture by the user'''
         
         if gesture == 'closed_fist':
-            pyautogui.moveTo(center[0], center[1])
+            pos_x_roy = center[0] - util.x1
+            pos_y_roy = center[1] - util.y1
+            width, height = pyautogui.size()
+            pyautogui.moveTo(pos_x_roy * width / (util.x2 - util.x1), pos_y_roy * height / (util.y2 - util.y1))
 
         elif gesture == 'thumbs_up':
             pyautogui.hotkey('ctrl', '+')
@@ -78,7 +81,7 @@ def main():
         cv2.circle(frame, center, 3, [255, 0, 0], -1)
 
         # Take action based on the gesture
-        # TODO: TAKE ACTION HERE WHEN THE PROJECT IS FINISHED
+        recognizer.take_action(gesture, center)
 
         cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow('Hand Gesture Recognition', frame)
