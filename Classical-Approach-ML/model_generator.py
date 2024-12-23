@@ -20,6 +20,7 @@ class HandGestureClassifier:
         # Load the dataset
         with open(dataset_path, 'rb') as f:
             dataset = pickle.load(f)
+            
         self.features = dataset['features']
         self.labels = dataset['labels']
         

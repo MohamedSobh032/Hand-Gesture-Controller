@@ -30,13 +30,10 @@ class HandGestureRecognizer:
         return prediction[0]
 
 
-    def take_action(self, frame: np.ndarray, roi: np.ndarray, gesture: str) -> None:
-        '''
-        Take action based on the recognized gesture by the user
-        '''
+    def take_action(self, gesture: str, center: tuple) -> None:
+        '''Take action based on the recognized gesture by the user'''
+        
         if gesture == 'closed_fist':
-            center = HandGestureRecognizer.find_hand_center(roi)
-            cv2.circle(frame, center, 3, [255, 0, 0], -1)
             pyautogui.moveTo(center[0], center[1])
 
         elif gesture == 'thumbs_up':

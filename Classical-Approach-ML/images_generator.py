@@ -1,9 +1,8 @@
 import os
 import cv2
-import numpy as np
 import util
 
-def generate_images(DELAY_TIME: int = 5) -> None:
+def generate_images(DELAY_TIME: int = 5, k: int = 2) -> None:
     '''
     Generates images for each gesture in the gestures list
     How to use:
@@ -46,7 +45,7 @@ def generate_images(DELAY_TIME: int = 5) -> None:
             cv2.imshow('frame', frame)
 
             # segment the image using kmeans
-            roi = util.segment_hand_kmeans(roi)
+            roi, _ = util.segment_hand_kmeans(roi, k=k)
             cv2.imshow('Segmentation', roi)
 
             # if user pressed q, break the waiting and start taking snippets
@@ -69,7 +68,7 @@ def generate_images(DELAY_TIME: int = 5) -> None:
             cv2.imshow('frame', frame)
 
             # segment the image using kmeans
-            roi = util.segment_hand_kmeans(roi)
+            roi, _ = util.segment_hand_kmeans(roi, k=k)
             cv2.imshow('Segmentation', roi)
 
             # await between each snippet
@@ -83,4 +82,4 @@ def generate_images(DELAY_TIME: int = 5) -> None:
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    generate_images(5)
+    generate_images()
