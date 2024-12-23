@@ -7,17 +7,15 @@ import pyautogui
 
 class HandGestureRecognizer:
 
-    def __init__(self, model_path=os.path.join(util.script_dir, util.MODEL_NAME)):
-        '''
-        Initialize the HandGestureRecognizer with the trained model
-        '''
+    def __init__(self, model_path=os.path.join(util.script_dir, util.MODEL_NAME)) -> None:
+        '''Initialize the HandGestureRecognizer with the trained model'''
 
         # Read the model and save it in a variable
         with open(model_path, 'rb') as f:
             self.classifier = pickle.load(f)['model']
 
 
-    def recognize_gesture(self, binary_image):
+    def recognize_gesture(self, binary_image: np.ndarray) -> str:
         '''
         Recognize the gesture from the binary image by extracting HOG features then predicting the gesture
         '''
@@ -30,61 +28,40 @@ class HandGestureRecognizer:
         # Predict the gesture
         prediction = self.classifier.predict([np.asarray(features)])
         return prediction[0]
-    
 
-    def find_hand_center(image):
+
+    def take_action(self, frame: np.ndarray, roi: np.ndarray, gesture: str) -> None:
         '''
-        Find the center of the hand in the binary image
+        Take action based on the recognized gesture by the user
         '''
+        if gesture == 'closed_fist':
+            center = HandGestureRecognizer.find_hand_center(roi)
+            cv2.circle(frame, center, 3, [255, 0, 0], -1)
+            pyautogui.moveTo(center[0], center[1])
 
-        # Find all non-zero points (hand pixels)
-        non_zero_points = cv2.findNonZero(image)
+        elif gesture == 'thumbs_up':
+            pyautogui.hotkey('ctrl', '+')
 
-        # Calculate center using moments
-        M = cv2.moments(image)
-        if M["m00"] != 0:
-            center_x = int(M["m10"] / M["m00"])
-            center_y = int(M["m01"] / M["m00"])
-        else:
-            # Fallback if moments fail
-            mean_point = np.mean(non_zero_points, axis=0)
-            center_x, center_y = mean_point[0]
+        elif gesture == 'thumbs_down':
+            pyautogui.hotkey('ctrl', '-')
 
-        return (center_x, center_y)
+        elif gesture == 'i_love_you':
+            pyautogui.rightClick()
+
+        elif gesture == 'victory':
+            pyautogui.leftClick()
 
 
-def take_action(frame: np.ndarray, roi: np.ndarray, gesture: str) -> None:
-    '''
-    Take action based on the recognized gesture by the user
-    '''
-    if gesture == 'closed_fist':
-        # Find the center of the hand
-        center = HandGestureRecognizer.find_hand_center(roi)
-        cv2.circle(frame, center, 3, [255, 0, 0], -1)
-        pyautogui.moveTo(center[0], center[1])
-    elif gesture == 'thumbs_up':
-        pyautogui.hotkey('ctrl', '+')
-    elif gesture == 'thumbs_down':
-        pyautogui.hotkey('ctrl', '-')
-    elif gesture == 'i_love_you':
-        pyautogui.rightClick()
-    elif gesture == 'victory':
-        pyautogui.leftClick()
-    else:
-        pass
 
 def main():
-    '''
-    Main function of our project
-    '''
+    '''Main function of our project'''
 
     # Initialize the camera and the recognizer
     cap = cv2.VideoCapture(0)
     recognizer = HandGestureRecognizer()
 
-    pyautogui.FAILSAFE = False
-
     while True:
+
         # read the frame and flip it
         _, frame = cap.read()
         frame = cv2.flip(frame, 1)
@@ -94,16 +71,17 @@ def main():
         roi = frame[util.x1:util.x2, util.y1:util.y2]
 
         # segment the image using kmeans
-        roi = util.segment_hand_kmeans(roi, 3) * 255
-        cv2.imshow('roi', roi)
+        roi_kmeans, center = util.segment_hand_kmeans(roi, 3)
+        cv2.imshow('ROI of K-Means', roi_kmeans)
 
         # recognize the gesture
-        gesture = recognizer.recognize_gesture(roi)
+        gesture = recognizer.recognize_gesture(roi_kmeans)
         
+        # DEBUGGING: GET CENTER OF THE HAND AND PRINT A DOT INTO IT
+        cv2.circle(frame, center, 3, [255, 0, 0], -1)
+
         # Take action based on the gesture
-        #take_action(frame, roi, gesture)
-        centerx, centery = HandGestureRecognizer.find_hand_center(roi)
-        cv2.circle(frame, (util.x1 + centerx, util.y1 + centery), 3, [255, 0, 0], -1)
+        # TODO: TAKE ACTION HERE WHEN THE PROJECT IS FINISHED
 
         cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         cv2.imshow('Hand Gesture Recognition', frame)
