@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import pickle
 import util
+import pyautogui
 import customtkinter as ctk
 from PIL import Image
 
@@ -10,15 +11,14 @@ class HandGestureRecognizer:
 
     def __init__(self, model_path=os.path.join(util.script_dir, util.MODEL_NAME)) -> None:
         '''Initialize the HandGestureRecognizer with the trained model'''
-
         # Read the model and save it in a variable
         with open(model_path, 'rb') as f:
             self.classifier = pickle.load(f)['model']
 
-
     def recognize_gesture(self, binary_image: np.ndarray) -> str:
-        '''Recognize the gesture from the binary image by extracting HOG features then predicting the gesture'''
-
+        '''
+        Recognize the gesture from the binary image by extracting HOG features then predicting the gesture
+        '''
         # Extract HOG features
         features = util.extract_hog_features(binary_image)
         if features is None:
@@ -39,19 +39,6 @@ class HandGestureRecognizer:
             canvas.delete("pointer")
             canvas.create_oval(pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, fill="red", tags="pointer")
 
-        # elif gesture == 'thumbs_up':
-        #     print("Zoom In action triggered")
-
-        # elif gesture == 'thumbs_down':
-        #     print("Zoom Out action triggered")
-
-        # elif gesture == 'i_love_you':
-        #     print("Right Click action triggered")
-
-        # elif gesture == 'victory':
-        #     print("Left Click action triggered")
-
-
 class HandGestureApp:
 
     def __init__(self, root):
@@ -62,7 +49,7 @@ class HandGestureApp:
 
         # Header Label
         self.header = ctk.CTkLabel(self.root, text="Hand Gesture Recognition", font=ctk.CTkFont(size=24, weight="bold"))
-        self.header.grid(row=0, column=0, columnspan=3, pady=20)
+        self.header.grid(row=0, column=0, columnspan=3, pady=20, sticky="n")
         
         # Set up the recognizer
         self.recognizer = HandGestureRecognizer()
@@ -76,11 +63,11 @@ class HandGestureApp:
 
         # Frame for the ROI feed
         self.roi_frame = ctk.CTkLabel(self.root, text="")
-        self.roi_frame.grid(row=1, column=1, padx=20, pady=20)
+        self.roi_frame.grid(row=1, column=1, padx=20, pady=(40, 0))
 
-        # Gesture Label above ROI
-        self.gesture_label = ctk.CTkLabel(self.root, text="Gesture: None", font=ctk.CTkFont(size=16))
-        self.gesture_label.grid(row=1, column=1, sticky="n", pady=(0, 10))
+        # Gesture Label directly above ROI
+        self.gesture_label = ctk.CTkLabel(self.root, text="Gesture: None", font=ctk.CTkFont(size=20, weight="bold"))
+        self.gesture_label.grid(row=1, column=1, sticky="n", pady=(10, 0))
 
         # Canvas for gesture actions
         self.canvas_frame = ctk.CTkFrame(self.root)
@@ -91,8 +78,9 @@ class HandGestureApp:
         self.canvas.pack(pady=10)
 
         # Footer with instructions
-        self.footer = ctk.CTkLabel(self.root, text="Instructions: Perform gestures within the ROI box", font=ctk.CTkFont(size=12))
-        self.footer.grid(row=2, column=0, columnspan=3, pady=20)
+        self.footer = ctk.CTkLabel(self.root, text="\u2022 Perform gestures within the ROI box \u2022 Use 'q' to quit the application \u2022 Enjoy interacting with gestures!", \
+                                  font=ctk.CTkFont(size=16), anchor="w", wraplength=1000, justify="left")
+        self.footer.grid(row=2, column=0, columnspan=3, pady=20, sticky="w")
 
         # Update loop
         self.update()
@@ -143,7 +131,6 @@ class HandGestureApp:
 
 
 if __name__ == '__main__':
-    
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
 
