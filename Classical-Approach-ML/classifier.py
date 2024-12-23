@@ -3,7 +3,8 @@ import numpy as np
 import cv2
 import pickle
 import util
-import pyautogui
+import customtkinter as ctk
+from PIL import Image
 
 class HandGestureRecognizer:
 
@@ -16,80 +17,137 @@ class HandGestureRecognizer:
 
 
     def recognize_gesture(self, binary_image: np.ndarray) -> str:
-        '''
-        Recognize the gesture from the binary image by extracting HOG features then predicting the gesture
-        '''
+        '''Recognize the gesture from the binary image by extracting HOG features then predicting the gesture'''
 
         # Extract HOG features
         features = util.extract_hog_features(binary_image)
         if features is None:
             return "No hand detected"
-        
+
         # Predict the gesture
         prediction = self.classifier.predict([np.asarray(features)])
         return prediction[0]
 
-
-    def take_action(self, gesture: str, center: tuple) -> None:
-        '''Take action based on the recognized gesture by the user'''
-        
+    def take_action(self, gesture: str, center: tuple, canvas: ctk.CTkCanvas) -> None:
+        '''Take action based on the recognized gesture within the GUI'''
         if gesture == 'closed_fist':
-            pos_x_roy = center[0] - util.x1
-            pos_y_roy = center[1] - util.y1
-            width, height = pyautogui.size()
-            pyautogui.moveTo(pos_x_roy * width / (util.x2 - util.x1), pos_y_roy * height / (util.y2 - util.y1))
+            # Move a pointer on the canvas
+            canvas_width = canvas.winfo_width()
+            canvas_height = canvas.winfo_height()
+            pos_x = center[0] * canvas_width / (util.x2 - util.x1)
+            pos_y = center[1] * canvas_height / (util.y2 - util.y1)
+            canvas.delete("pointer")
+            canvas.create_oval(pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, fill="red", tags="pointer")
 
-        elif gesture == 'thumbs_up':
-            pyautogui.hotkey('ctrl', '+')
+        # elif gesture == 'thumbs_up':
+        #     print("Zoom In action triggered")
 
-        elif gesture == 'thumbs_down':
-            pyautogui.hotkey('ctrl', '-')
+        # elif gesture == 'thumbs_down':
+        #     print("Zoom Out action triggered")
 
-        elif gesture == 'i_love_you':
-            pyautogui.rightClick()
+        # elif gesture == 'i_love_you':
+        #     print("Right Click action triggered")
 
-        elif gesture == 'victory':
-            pyautogui.leftClick()
+        # elif gesture == 'victory':
+        #     print("Left Click action triggered")
 
 
+class HandGestureApp:
 
-def main():
-    '''Main function of our project'''
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Hand Gesture Recognition GUI")
+        self.root.geometry("1200x800")
+        self.root.configure(bg="#2a2d2e")
 
-    # Initialize the camera and the recognizer
-    cap = cv2.VideoCapture(0)
-    recognizer = HandGestureRecognizer()
+        # Header Label
+        self.header = ctk.CTkLabel(self.root, text="Hand Gesture Recognition", font=ctk.CTkFont(size=24, weight="bold"))
+        self.header.grid(row=0, column=0, columnspan=3, pady=20)
+        
+        # Set up the recognizer
+        self.recognizer = HandGestureRecognizer()
 
-    while True:
+        # Set up the camera
+        self.cap = cv2.VideoCapture(0)
 
-        # read the frame and flip it
-        _, frame = cap.read()
+        # Frame for the video feed
+        self.video_frame = ctk.CTkLabel(self.root, text="")
+        self.video_frame.grid(row=1, column=0, padx=20, pady=20)
+
+        # Frame for the ROI feed
+        self.roi_frame = ctk.CTkLabel(self.root, text="")
+        self.roi_frame.grid(row=1, column=1, padx=20, pady=20)
+
+        # Gesture Label above ROI
+        self.gesture_label = ctk.CTkLabel(self.root, text="Gesture: None", font=ctk.CTkFont(size=16))
+        self.gesture_label.grid(row=1, column=1, sticky="n", pady=(0, 10))
+
+        # Canvas for gesture actions
+        self.canvas_frame = ctk.CTkFrame(self.root)
+        self.canvas_frame.grid(row=1, column=2, padx=20, pady=20)
+        self.canvas_label = ctk.CTkLabel(self.canvas_frame, text="Gesture Actions", font=ctk.CTkFont(size=18))
+        self.canvas_label.pack(pady=10)
+        self.canvas = ctk.CTkCanvas(self.canvas_frame, width=400, height=400, bg="white")
+        self.canvas.pack(pady=10)
+
+        # Footer with instructions
+        self.footer = ctk.CTkLabel(self.root, text="Instructions: Perform gestures within the ROI box", font=ctk.CTkFont(size=12))
+        self.footer.grid(row=2, column=0, columnspan=3, pady=20)
+
+        # Update loop
+        self.update()
+
+    def update(self):
+        '''Update the video feed and process gestures'''
+        _, frame = self.cap.read()
         frame = cv2.flip(frame, 1)
 
-        # ROI based solution
+        # Draw the ROI
         cv2.rectangle(frame, (util.x1 - 1, util.y1 - 1), (util.x2 + 1, util.y2 + 1), (0, 255, 0), 2)
         roi = frame[util.x1:util.x2, util.y1:util.y2]
 
-        # segment the image using kmeans
+        # Segment the image using k-means
         roi_kmeans, center = util.segment_hand_kmeans(roi, 3)
-        cv2.imshow('ROI of K-Means', roi_kmeans)
 
-        # recognize the gesture
-        gesture = recognizer.recognize_gesture(roi_kmeans)
-        
-        # DEBUGGING: GET CENTER OF THE HAND AND PRINT A DOT INTO IT
-        cv2.circle(frame, center, 3, [255, 0, 0], -1)
+        # Recognize the gesture
+        gesture = self.recognizer.recognize_gesture(roi_kmeans)
 
-        # Take action based on the gesture
-        recognizer.take_action(gesture, center)
+        # Update gesture label
+        self.gesture_label.configure(text=f"Gesture: {gesture}")
 
-        cv2.putText(frame, f"Gesture: {gesture}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.imshow('Hand Gesture Recognition', frame)
-        if cv2.waitKey(1) == ord('q'):
-            break
+        # Perform action on canvas
+        self.recognizer.take_action(gesture, center, self.canvas)
 
-    cap.release()
-    cv2.destroyAllWindows()
+        # Convert the frame and ROI for customtkinter display
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        roi_rgb = cv2.cvtColor(roi_kmeans, cv2.COLOR_BGR2RGB)
+        frame_img_pil = Image.fromarray(frame_rgb)
+        roi_img_pil = Image.fromarray(roi_rgb)
+        frame_img_ctk = ctk.CTkImage(frame_img_pil, size=(640, 480))
+        roi_img_ctk = ctk.CTkImage(roi_img_pil, size=(320, 240))
+
+        self.video_frame.configure(image=frame_img_ctk)
+        self.video_frame.image = frame_img_ctk
+
+        self.roi_frame.configure(image=roi_img_ctk)
+        self.roi_frame.image = roi_img_ctk
+
+        # Schedule the next update
+        self.root.after(10, self.update)
+
+    def on_closing(self):
+        '''Release resources on closing'''
+        self.cap.release()
+        cv2.destroyAllWindows()
+        self.root.destroy()
+
 
 if __name__ == '__main__':
-    main()
+    
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("dark-blue")
+
+    root = ctk.CTk()
+    app = HandGestureApp(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    root.mainloop()
