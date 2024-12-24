@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 import pickle
 import util
-import pyautogui
 import customtkinter as ctk
 from PIL import Image
 
@@ -14,6 +13,7 @@ class HandGestureRecognizer:
         # Read the model and save it in a variable
         with open(model_path, 'rb') as f:
             self.classifier = pickle.load(f)['model']
+
 
     def recognize_gesture(self, binary_image: np.ndarray) -> str:
         '''
@@ -28,6 +28,7 @@ class HandGestureRecognizer:
         prediction = self.classifier.predict([np.asarray(features)])
         return prediction[0]
 
+
     def take_action(self, gesture: str, center: tuple, canvas: ctk.CTkCanvas) -> None:
         '''Take action based on the recognized gesture within the GUI'''
         if gesture == 'closed_fist':
@@ -38,6 +39,7 @@ class HandGestureRecognizer:
             pos_y = center[1] * canvas_height / (util.y2 - util.y1)
             canvas.delete("pointer")
             canvas.create_oval(pos_x - 5, pos_y - 5, pos_x + 5, pos_y + 5, fill="red", tags="pointer")
+
 
 class HandGestureApp:
 
@@ -78,12 +80,13 @@ class HandGestureApp:
         self.canvas.pack(pady=10)
 
         # Footer with instructions
-        self.footer = ctk.CTkLabel(self.root, text="\u2022 Perform gestures within the ROI box \u2022 Use 'q' to quit the application \u2022 Enjoy interacting with gestures!", \
+        self.footer = ctk.CTkLabel(self.root, text="GENERAL INSTRUCTIONS\n\t\u2022 Perform gestures within the ROI box \n\t\u2022 Use 'q' to quit the application \n\t\u2022 Enjoy interacting with gestures!", \
                                   font=ctk.CTkFont(size=16), anchor="w", wraplength=1000, justify="left")
         self.footer.grid(row=2, column=0, columnspan=3, pady=20, sticky="w")
 
         # Update loop
         self.update()
+
 
     def update(self):
         '''Update the video feed and process gestures'''
@@ -123,6 +126,7 @@ class HandGestureApp:
         # Schedule the next update
         self.root.after(10, self.update)
 
+
     def on_closing(self):
         '''Release resources on closing'''
         self.cap.release()
@@ -131,10 +135,12 @@ class HandGestureApp:
 
 
 if __name__ == '__main__':
+    
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
-
     root = ctk.CTk()
+
     app = HandGestureApp(root)
+
     root.protocol("WM_DELETE_WINDOW", app.on_closing)
     root.mainloop()

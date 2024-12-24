@@ -6,3 +6,4 @@ matplotlib
 pyautogui
 customtkinter
 mediapipe
+customtkinter

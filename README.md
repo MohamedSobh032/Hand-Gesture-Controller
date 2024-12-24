@@ -26,8 +26,10 @@ To run the Hand Gesture Controller, you'll need the following Python packages:
 - `pickle` - For data serialization in dataset creation and model generation
 - `skimage` - For Histogram of Gradients function
 - `sklearn` - For classifiers and model training
-- `matplotlib` - For comparison and visualization of different classifiers accuray
-- `pyautogui` - for controlling the mouse and keyboard
+- `matplotlib` - For comparison and visualization of different classifiers accuracy
+- `pyautogui` - For controlling the mouse and keyboard
+- `customtkinter` - For Graphical User Interface
+- `PTL` - For integration with tkinter
 
 You can install these required packages using pip. Run the following command in your terminal:
 
