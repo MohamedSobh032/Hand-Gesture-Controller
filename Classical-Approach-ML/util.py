@@ -2,7 +2,6 @@ import os
 import cv2
 import numpy as np
 from skimage.feature import hog
-import pyclesperanto_prototype as cle
 
 ########################################## GLOBAL DEFINES AND VARIABLES ##########################################
 
@@ -85,7 +84,7 @@ def segment_hand_kmeans(ROI: np.ndarray, k: int = 3, reference_color: tuple = (1
     # This restores the 2D image structure, with each pixel now having the RGB value of its cluster center
     # then converted back to gray-scale
     segmented_image = segmented_data.reshape((roi_rgb.shape))
-    segmented_image_gray = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2GRAY)
+    segmented_image_gray = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2GRAY) * 255
     
 
     # Determine the cluster that best corresponds to the hand region by comparing the cluster centers RGB values with a predefined reference color
@@ -118,7 +117,7 @@ def segment_hand_kmeans(ROI: np.ndarray, k: int = 3, reference_color: tuple = (1
     else:
         center_x, center_y = None, None  # No center found if no mass is detected
 
-    return segmented_image_gray * 255, (center_x, center_y)
+    return segmented_image_gray, (center_x, center_y)
 
 
 def extract_hog_features(img: np.ndarray) -> np.ndarray:

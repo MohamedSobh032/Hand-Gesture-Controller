@@ -57,7 +57,7 @@ class HandGestureApp:
         self.recognizer = HandGestureRecognizer()
 
         # Set up the camera
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(util.CAM_INDEX)
 
         # Frame for the video feed
         self.video_frame = ctk.CTkLabel(self.root, text="")
